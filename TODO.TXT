@@ -1,0 +1,48 @@
+ToDo - list for Tripple-DOS project
+===================================
+
+1) Highest priority - bring DPMI to a working level, at least with some
+common applications (GCC, WCC, BCC, TASM, etc).
+
+The following in no particular priority order:
+----------------------------------------------
+
+2) EMS support (?)
+
+3) Devices arbitration. Devices are divided to categories:
+
+ a) shared devices
+ b) owned devices
+ c) unknown devices
+
+    Devices from category (a) are shared between all tasks and possibly main
+executive. They are most likely interactive devices. Devices from category (b)
+are assumed to the task that first started to use them. Other tasks will not
+be given access to them until owner task terminates (doesn't use device for
+some amount of time? let user tell it to system in some other means?). Tasks
+from category (c) are not arbitrated at all. (User must be given means to
+tell the system about tasks from category (c) so that they could be moved to
+categories (b) or (a).
+
+4) Redesign system memory management (amount of contiguous memory that could
+be allocated is limited only by the amount of free memory).
+
+5) Start new tasks as vfork()ed rather than fork()ed. Original DOS task is
+mapped into newly created address space rather than copied. New pages will be
+allocated by a page fault handler (copy-on-write).
+NOTE: basically modifications made by both parent and child task should be
+trapped. However "parent" task is not used for anything so it shouldn't modify
+anything anyway. Some pages will be marked simply not present (demand paging).
+If task's demand for a new page can't be satisfied, task will go to sleep
+(or ask user to close some other tasks before).
+
+6) Redesign client register packing (?)
+
+7) Write basic user interface (probably in C)
+
+8) Redesign the scheduler to allow arbitrary time sharing for the user
+
+9) Disk caching into memory on sector level (user defines cache size) for not
+heavily loaded system.
+
+10) Virtual memory for heavily loaded systems. (?)

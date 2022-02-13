@@ -1,0 +1,113 @@
+17/04/99
+--------
+
+Open issues:
+
+* File sharing bug - fails under massive tests. FIXED
+[Bug at add_open when opening file].
+
+* HeapFreePage problems - gets incomprehencible input. FIXED
+
+* DPMI.
+
+
+18/04/99
+--------
+
+Open issues:
+
+* Improper task switching (long blocks) with INT 28 handling.
+[Batch processor calls INT 28h on each iteration. Task can get blocked when
+owning a semaphore or when file is open. INT 28h "block" must be replaced
+with something less strict. Probably INT 16h can be blocked firmly].
+
+* Optimize all system traps.
+
+* DPMI.
+
+* Configuration file.
+
+* Virtualize other standard devices (timer, PIC, etc)
+
+
+19/04/99
+--------
+
+Open issues:
+
+* Improper task switching (long blocks) with INT 28 handling. SOLVED.
+{INT 28h doesn't block current task, but instead simply releases current time
+share}
+
+* Optimize all system traps.
+Consider:
+- Try to avoid double saving registers (save directly to task's structure). INEFFICIENT
+- Keep pointer to current, foreground etc. tasks handy. DONE
+- Set common interrupts (13h, 20h-2Fh, 10h, 16h, 31h) directly callable.
+
+* DPMI.
+
+* Configuration file.
+
+* Virtualize other standard devices (timer, PIC, etc)
+
+
+Known bugs/anomalies:
+
+* If memory map is allocated beneath OsStartPage, #PF.
+
+
+05/05/99.
+---------
+
+Initial switch to DPMI works.
+
+Open issues: since 19/04/99
+
+
+07/05/99.
+---------
+
+DPMI selector management functions work.
+
+Open issues: since 19/04/99
+
+
+17/05/99.
+---------
+
+DPMI interrupts and exceptions handling work.
+
+Open issues: since 19/04/99
+
+
+17/05/99.
+---------
+
+* Separate locked VM and PM stacks, allow callbacks nesting.
+
+* Map HMA like A20 emabled, allow HIMEM.SYS work.
+
+Open issues: since 19/04/99
+
+23/03/2000.
+-----------
+
+Work on the project resumed!
+
+Fixed check for open file names and rebooting DPMI exception handler reporting.
+
+26/03/2000.
+-----------
+
+Fixed return from interrupts redirected to VM and DOS block alloc and free.
+
+03/08/2000.
+-----------
+
+Changed the memory management structures so that 4M of contiguous memory limitation is no longer intact.
+
+13/08/2000.
+-----------
+
+Released version 0.45 as a shareware beta!

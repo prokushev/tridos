@@ -1,0 +1,132 @@
+;=============================================================================
+;
+;				PROJECT.DOC
+;				-----------
+;
+;	TriDOS project and on-going documentation.
+;
+;=============================================================================
+
+I. Memory manager.
+------------------
+
+I.1. Memory map.
+
+* Parts of physical memory 00000000 - 000FFFFF (1st megabyte) are mapped 
+1-to-1. This is in order to call underlying DOS and BIOS services (system VM).
+The parts are: IVT, BIOS data are, DOS data are, DOS up to COMMAND.COM (incl),
+display memory, reserved memory (C0000-EFFFF), ROM BIOS code. The memory in
+between will be marked as not present, so free pages from physical 1st 
+megabyte may be allocated.
+
+* TriDOS core code, system tables, etc. is places starting from lin. 
+address 40000000h (OS_BASE).
+
+* TriDOS code and tables resides in the 1st megabyte of the physical 
+memory, so this area must be always not mapped in task's lin. address space.
+
+* All physical memory is mapped in bitmask table (each bit marks the
+availability of the physical page, 0=Avail). Table size is appropriate to 
+physical memory size.
+
+* Linear memory at OS_BASE is mapped in each address space.
+
+* OS heap space will define the linear address space where allocatable memory
+pages will reside (80000000h). It will be mapped in each task's address space.
+
+* DPMI heap space is currently reserved at C0000000 - FFFFFFFF (4th Gb). This
+area will be private for each task, not visible from others.
+CURRENTY: DPMI allocations work with global kernel heap (shared). This is no
+good for protection, should be later changed to the specified above.
+
+* When a page is allocated for page table, its last entry will map itself. So
+the memory manager will know that if the page table contains only the last
+entry it should be deleted.
+[NOTE:] this doesn't allow allocations for more than 4M linear memory. Why
+the hell is it needed???
+
+* Add an option to substitute fork-like new VM creation to vfork-like: all
+memory is mapped into new address space as read-only and marked copy-on-write.
+
+
+II. Task manager.
+-----------------
+
+II.1. DOS application task.
+---------------------------
+* Starts the new DOS session. Each task has time share. Relative to other 
+task's share size is determined by priority in configuration file.
+
+* If a task expires its time share but can't be suspended (does I/O or has
+called system service) it "borrows" time from task manager. Next time
+this task is about to be run its time share will be less by the time it 
+lended. It is possible that a task borrows several time shares ahead (so it
+will miss next several rounds).
+
+* DOS tasks are managed with the help of tasks table (array of DosTask 
+structures). index of array (starting from 1) is a task's ID.
+
+II.2. System control (core) task.
+---------------------------------
+Gains control each time something happens (exc., int., system call). No 
+address space change - executes in environment of the interrupted task. No
+time share is assigned. If called by DOS app. task, counted in caller's time 
+share.
+
+II.3. System VM task.
+---------------------
+Gains control only when system control task calls it to get system service.
+Runs in system address space. No time share is assigned. If called by DOS
+app. task, counted in caller's time share.
+
+II.4. DOS tasks management.
+---------------------------
+* Each DOS task session starts with allocating linear space and copying an 
+original DOS to it.
+
+* Each s/w interrupt is started with faulting to GPF handler. Then it's deci-
+ded on per-call basis to reflect it to itself or handle it in system VM. On
+later stage Int. permission bitmap will be used.
+
+II.5. Services with special handling.
+-------------------------------------
+The following services will be handled by system:
+
+* Interactive I/O (CON, mouse) focus determines "active" application to avoid
+frequent display switches.
+
+* File I/O must take precausions due to possible file sharing.
+
+* Video hardware ports access and INT 10h for changing modes will be allowed 
+only for active DOS box (with I/O focus). Other INT 10h (output) and video
+memory are allowed (this will work incorrectly in 'virtual' graphics 
+bit-plane modes; they will not be allowed in background).
+
+* Background processes may output to other periferials (COMs, LPTs, LAN, etc.)
+and get input.
+
+
+III. Configuration file.
+------------------------
+Stores the configuration parameters. Will be present in simple text format. 
+The configurable parameters are:
+
+* Time slice (ms)
+* 1 share (slices)
+* Maximum number of tasks.
+* Priorities of tasks (foreground, background, individual).
+* Maximum suspend time.
+
+
+To do list:
+===========
+
+* DPMI - fix!
+* copy-on-write pages - how to determine requirement for reservation?
+* disk caching on sector level - would increase performance. May be pages
+saved on copying (until written to) will go to disk caching?
+* optimization of interrupts path, alignment.
+* Rewrite memory management and get rid of 4 M limitation for contiguous
+linear regions.
+* DS to flat data segment, get rid of FS: overrides. (possible?)
+* Pentium+ VME - useful?

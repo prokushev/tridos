@@ -1,0 +1,171 @@
+TRIPPLE DOS - release notes (v 0.49).
+-------------------------------------
+
+	This document describes some working principles of Tripple DOS to
+make easier understanding some of its features (present and future). Several 
+technical issues usually interesting only to low-level programmers are also 
+covered: without them it would be impossible to understand the rest. Some 
+other issues are intended for programmers and may not be of much interest to 
+everybody.
+
+In the text below "task" is equivalent to "session"; Tripple DOS switches 
+tasks as complete virtual machines, without getting into exactly what program
+is running. This is so-called "preemptive multitasking". It is different for 
+example, from the task switching that DOSSHELL provides. (DOSSHELL may be run
+inside a single task under Tripple DOS. Will have to test this opportunity).
+
+1. DOS is designed to work on x86 CPUs operating in Real Mode. It was the only 
+mode of operation of 8086 CPU; all later models include it for (almost) full
+binary compatibility. The most important characteristics of real mode are: 1M
+of memory, segment:offset addressing style with physical address = segment * 
+16 + offset, and no memory protection between different programs.
+
+80386 and later CPUs introduced "virtual-8086" or V86 emulation mode. The 
+addressing style in V86 mode is as in real mode but privilege mode is the 
+least privileged. All system events are reported to system monitor that runs 
+in the most privileged CPU mode. Paging system allows translation of any 
+32-bit linear address to any 32-bit physical address. All that together 
+provide enough means to create a multitasking model for V86 tasks, or build 
+in support for V86 tasks into a multitasking OS.
+
+2. Tripple DOS uses all that means to do its work. It starts as a regular DOS
+program in Real Mode (necessary; if you try to run it in V86 mode it will
+report an error and refuse to run). The original environment in which Tripple
+DOS started serves as a master copy of DOS. When a new task is started, 
+Tripple DOS copies the master copy to the new task, creating two identical 
+copies. The process resembles forking new processes on UNIX OSes. Then it 
+terminates in the new task, leaving a copy of original DOS live on its own.
+
+All tasks reside in separate address spaces (virtual machines, as they are 
+usually called). Anything that one task does will not affect other tasks. 
+Also, V86 mode is the least privileged; that is, at the same cost Tripple DOS
+gives much better crash protection than original DOS (which is not protected 
+at all). There are, of course, Tripple DOS'es own bugs that may lead to a 
+system crash (Tripple DOS is also software).
+
+This leads to some interesting opportunities. For example, if a user prefers 
+Norton Commander shell over Command.COM shell, (s)he may start Tripple DOS 
+from Norton Commander. Every new task since then will start with NC shell 
+(which may be terminated in every session without affecting the others).
+
+Another funny feature is independence of files buffers in different sessions.
+Because different DOS sessions have their own copies of disk buffers, changes
+made to files in one of them do not immediately get known to the others. E.g.
+if a file is created in one task, it will take some time before another task
+will see it.
+
+3. Tripple DOS supports saving and restoring of video state. All modes 
+available on standard VGA are supported (this includes text, 2 color, 4 color,
+16 color and some 256 color graphics modes, including so-called "mode X"). 
+Unfortunately, some video cards that claim VGA compatibility are not 
+VGA-compatible on register level (Tripple DOS does state switching on this 
+level). Tripple DOS may not work correctly with such cards.
+
+Extended SuperVGA modes meanwhile are not supported, even though occasionally
+some modes on some cards may work correctly.
+
+4. Tripple DOS maintains open files list for each task and handles some file
+sharing. That is, if some file was opened in one task, it is only possible to
+open it read-only in another task. It's not an extremely useful feature; 
+it may solve only some very brutal interference. For instance, if the same 
+file is opened by text editors in two different tasks, they both may write 
+to it, causing incorrect results. This happens because text editors (and most
+other programs) open files only when they want to write to it.
+
+5. Tripple DOS may not interoperate correctly with programs that had allocated
+extended memory before Tripple DOS was started. HIMEM.SYS works in Real Mode 
+and still provides extended memory. Thus Tripple DOS is not prevented from 
+being started, but once started it claims all physical memory higher than 1M.
+Please don't start such programs before Tripple DOS. Their data in extended 
+memory may get corrupted. Tripple DOS now provides extended (XMS) memory 
+itself, so you may run such programs in sessions.
+
+Loading programs that use High Memory (between 1M and 1M + 64K), however, will
+work correctly with Tripple DOS. For instance, you may load DOS high (and DOS
+will be in high memory in every session).
+
+Some programs may still work incorrectly under extended memory provided by
+Tripple DOS. Such programs may, for example, assume that HIMEM.SYS is present
+(like MEM.EXE from DOS 7 does). Or else they may assume that any program
+provides XMS interface fully equivalent with HIMEM.SYS. Tripple DOS provides
+extended memory in in accordance to XMS 3.0, not to HIMEM.SYS! Some functions
+implemented in HIMEM.SYS are not implemented in Tripple DOS and are reported
+as such, as specified in XMS 3.0. Future versions of Tripple DOS may implement
+additional XMS functions.
+
+Expanded (EMS) memory is not provided.
+
+DPMI server (compliant to DPMI specification 0.9) is in work.
+
+6. Tripple DOS virtualizes some devices. Most effort was spent on correct 
+sharing of common devices found in a typical DOS machine: keyboard, display, 
+integrated peripherials, disks. Mouse is not correcty handled (yet). 
+
+Programmable interval timer (PIT) runs at 0.001(s) rate; a session may install
+its own virtual timer with no higher rate than 0.001 (s). If a program 
+attempts to reprogram timer to a higher rate, it will be rounded to 0.001 (s).
+Settings in one task (session) don't affect settings of the others'.
+
+Programmable interrupt controller (PIC) is virtualized. If a task disables
+interrupts, it will not receive them, but this will not affect other tasks.
+
+DMA is virtualized; however currently it is tested to work only with floppy
+disks.
+
+All other devices are not properly synchronized yet. Any task may access the
+hardware directly and interrupts are reported to the task that is currently
+running. This is subject to fixes in the closest releases.
+
+If you run a single task, such problems won't occur.
+
+7. Tasks are switched automatically every 0.01 (s). No priority handling is
+meanwhile done; all tasks get equal time slices. However, Tripple DOS tracks
+some idle cases for tasks (that may for instance wait for a key press). Such
+tasks will not get time until their designated event arrives (a key is 
+pressed). Instead, the time will be handed over to non-idle tasks that may do
+something useful.
+
+8. Here are headlines of my To-Do list for Tripple DOS; they appear in order
+of my preferences (may change from time to time). Of course, bug reports may
+get a higher preference than all of that. Unfortunately I can't guarantee any
+due date for these features; they will be released when they are done. Note
+that your reports may add to this list or change its priorities!
+
+
+ToDo - list for Tripple-DOS project
+===================================
+
+(o) bring DPMI to a working level, at least with some
+common heavy applications (GCC, WCC, BCC, TASM, etc).
+
+(o) Devices arbitration. Devices are divided to categories:
+
+ a) shared devices
+ b) owned devices
+ c) unknown devices
+
+    Devices from category (a) are shared between all tasks and possibly main
+executive. They are most likely interactive devices. Devices from category (b)
+are assumed to the task that first started to use them. Other tasks will not
+be given access to them until owner task terminates (doesn't use device for
+some amount of time? let user tell it to system in some other means?). Tasks
+from category (c) are not arbitrated at all. (User must be given means to
+tell the system about tasks from category (c) so that they could be moved to
+categories (b) or (a).
+
+(o) Start new tasks as copy-on-write rather than copied. 
+
+(o) Write basic user interface
+
+(o) Redesign the scheduler to allow arbitrary time sharing for the user
+
+(o) Disk caching into memory on sector level (user defines cache size) for not
+heavily loaded system.
+
+(o) Virtual memory for heavily loaded systems. (?)
+
+
+==========================================
+Tripple DOS is copyright (c) Vadim Drubetsky AKA Black Phantom 1998-2001
+
+All other mentioned trademarks belong to their respective owners.

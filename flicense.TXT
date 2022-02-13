@@ -1,0 +1,23 @@
+		Triple-DOS License.
+		===================
+
+	0. This license defines terms and conditions for use of Tripple-DOS, Black Phantom's DOS multitasking program.
+The term "Tripple-DOS" refers to full original package or any sub-package derived from it. Tripple-DOS is copyright (c) Vadim Drubetsky aka the Black Phantom, 1998, 2000. All rights reserved. You (either an individual or a single entity) are not required to sign or somehow acknowledge your use of Tripple-DOS. However your use of Tripple-DOS must fully comply to this license; any misuse automatically terminates this license and revokes from you any right to further use Tripple-DOS. You have no other rights on Tripple-DOS except for non-exclusive rights listed here.
+
+	1. COPYING. You may make an unlimited number of copies for any purpose. You may make any number of modified copies for your own use. Distribution of modified copies fall under terms of PARTIAL DISTRIBUTION (2).
+
+	2. PARTIAL DISTRIBUTION. Any partial distribution of Triple-DOS must include a notice saying that it is "Copyright (c) Black Phantom AKA Vadim Drubetsky, 1998-2001." Any product or software package including Triple-DOS or part of it must include such notice.
+
+	3. DISTRIBUTION WITH DIFFERENT TERMS. Triple-DOS may be distributed, leased or rented under different terms than
+defined by this license provided that:
+	a) you (distributor) acquired your copy in compliance to this license
+	b) your license is not less restrictive than this one, i.e. it doesn't allow anything prohibited by this license 
+	c) if your license allows further redistribution it must enforce inclusion of acknowledgement notice (2) in all distributions.
+
+	4. TERMS OF USE. This version of Triple-DOS may be used free of charge for any purpose, either in binary form or as source code. It is intended, but not limited to, be used for its primary purpose - running several DOS tasks at the same time or as an educational source.
+
+	5. LIMITATION OF LIABILITY. In no event, except for when it is explicitly stated by the applicabe law, shall Vadim Drubetsky aka the Black Phantoms be liable for any special, incidental, indirect, or consequential damages (including but not limited to profit loss, business interruption, loss of business information, or any other pecuniary loss) arising out of the use of or inability to use Tripple-DOS, even if he has been advised of the possibility of such damages.
+
+
+-----
+All trademarks, registered trademarks and reserved words belong to their respective owners.

@@ -1,0 +1,27 @@
+		Known bugs / inconsistensies.
+		=============================
+
+1)	Date: ??/??/2000
+	Reported by: Internal
+
+If AllocDOSBlockRet finds that all DosBlockSel structures exhausted, it
+wrongly silently returns. Should be changed to panic() - though it's a very
+unlike case.
+
+2)	Date: 14/08/2000
+	Reported by: Alexei A. Frounse
+
+Graphics applications in bit-plained modes don't work correctly when running in
+background.
+
+3)	Date: 14/08/2000
+	Reported by: Alexei A. Frounse
+
+Virtualized timer apparently runs faster, it causes weird effects when playing
+midi and in other circumstances.
+
+4)	Date: 14/08/2000
+	Reported by: Alexei A. Frounse
+
+Control keys interfere with popular software packages (NC, Borland's IDE etc.)
+Also lack of task management controls is annoying.

@@ -1,0 +1,86 @@
+head	0.2;
+access;
+symbols;
+locks
+	BlackPhantom:0.2; strict;
+comment	@# @;
+
+
+0.2
+date	98.05.28.02.58.25;	author BlackPhantom;	state Exp;
+branches;
+next	;
+
+
+desc
+@MULTIX32 project documentation file
+@
+
+
+0.2
+log
+@Initial check-in
+@
+text
+@;=============================================================================
+;
+;				PROJECT.DOC
+;				-----------
+;
+;	MULTIX32 project and on-going documentation.
+;
+;=============================================================================
+
+I. Memory manager.
+------------------
+
+I.1. Memory map.
+
+* Parts of physical memory 00000000 - 000FFFFF (1st megabyte) are mapped 
+1-to-1. This is in order to call underlying DOS and BIOS services (system VM).
+The parts are: IVT, BIOS data are, DOS data are, DOS up to COMMAND.COM (incl),
+display memory, reserved memory (C0000-EFFFF), ROM BIOS code. The memory in
+between will be marked as not present, so free pages from physical 1st 
+megabyte may be allocated.
+
+* MULTIX32 core code, system tables, etc. is places starting from lin. 
+address 40000000h (OS_BASE).
+
+* MULTIX32 code code and tables resides in the 1st megabyte of the physical 
+memory, so this area must be always marked not present in 1st megabyte of
+lin. addresses.
+
+* All physical memory will be mapped in bitmask table (each bit marks the
+availability of the physical page, 0=Avail). Table size is appropriate to 
+physical memory size.
+
+* Linear memory at OS_BASE will be mapped in each address space.
+
+
+II. Task manager.
+-----------------
+
+II.1. DOS application task.
+---------------------------
+* Starts the new DOS session. Each task has time share. Relative to other 
+task's share size is determined by priority in configuration file.
+
+* If a task expires its time share but can't be suspended (does I/O or has
+called system service) it "borrows" time from from task manager. Next time
+this task is about to be run its time share will be less by the time it 
+lended. It is possible that a task borrows several time shares ahead (so it
+will miss next several rounds).
+
+II.2. System control (core) task.
+---------------------------------
+Gains control each time something happens (exc., int., system call). No 
+address space change - executes in environment of the interrupted task. No
+time share is assigned. If called by DOS app. task, counted in caller's time 
+share.
+
+II.3. System VM task.
+---------------------
+Gains control only when system control task calls it to get system service.
+Runs in separate address space. No time share is assigned. If called by DOS
+app. task, counted in caller's time share.
+@
